@@ -6,15 +6,15 @@
 
 typedef std::function<void(void *data)> NauiEvent;
 
-enum class NauiSystemEventCode : uint8_t
+enum NauiSystemEventCode : uint8_t
 {
-    Quit,
-    KeyPressed,
-    KeyReleased,
-    Char,
-    FileDropped,
-    MAX
+    NauiSystemEventCode_Quit,
+    NauiSystemEventCode_KeyPressed,
+    NauiSystemEventCode_KeyReleased,
+    NauiSystemEventCode_Char,
+    NauiSystemEventCode_FileDropped,
+    NauiSystemEventCode_MAX
 };
 
-void naui_event_connect(const NauiSystemEventCode code, NauiEvent on_event);
-void naui_event_call(const NauiSystemEventCode code, void *data);
+NAUI_API void naui_event_connect(const NauiSystemEventCode code, NauiEvent on_event);
+NAUI_API void naui_event_call(const NauiSystemEventCode code, void *data);

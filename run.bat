@@ -1,3 +1,3 @@
 cd bin\Release
-Naui.exe
+Sandbox.exe
 cd ..

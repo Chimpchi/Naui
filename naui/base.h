@@ -8,4 +8,16 @@
 #define NAUI_PLATFORM_LINUX 1
 #endif
 
+#ifdef NAUI_EXPORT
+#ifdef _MSC_VER
+#define NAUI_API __declspec(dllexport)
+#else
+#define NAUI_API __attribute__((visibility("default")))
+#endif
+#else
+#ifdef _MSC_VER
+#define NAUI_API __declspec(dllimport)
+#else
 #define NAUI_API
+#endif
+#endif

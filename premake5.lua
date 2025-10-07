@@ -3,7 +3,7 @@ workspace "Naui"
     startproject "Sandbox"
 
 project "Naui"
-    kind "StaticLib"
+    kind "SharedLib"
     language "C++"
 	cppdialect "C++20"
 	targetdir "bin/%{cfg.buildcfg}"
@@ -25,7 +25,7 @@ project "Naui"
         "vendor/nlohmann"
     }
 
-    defines { "NDEBUG", "NAUI_EXPORT" }
+    defines { "NDEBUG", "IMGUI_BUILD_DLL", "NAUI_EXPORT" }
     optimize "On"
 
     filter "system:windows"

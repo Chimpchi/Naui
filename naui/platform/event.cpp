@@ -1,6 +1,6 @@
 #include "event.h"
 
-static NauiEvent registered_events[(uint8_t)NauiSystemEventCode::MAX] = { nullptr };
+static NauiEvent registered_events[(uint8_t)NauiSystemEventCode_MAX] = { nullptr };
 
 void naui_event_connect(NauiSystemEventCode code, NauiEvent on_event)
 {

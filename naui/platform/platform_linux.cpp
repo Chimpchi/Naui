@@ -101,7 +101,7 @@ void naui_platform_begin(void)
             case SDL_QUIT:
             {
                 NauiQuitEvent data;
-                naui_event_call(NauiSystemEventCode::Quit, (void*)&data);
+                naui_event_call(NauiSystemEventCode_Quit, (void*)&data);
             }
             break;
             case SDL_WINDOWEVENT:
@@ -121,7 +121,7 @@ void naui_platform_begin(void)
                 
                 NauiKeyEvent data;
                 data.key = (NauiKey)event.key.keysym.sym;
-                naui_event_call(pressed ? NauiSystemEventCode::KeyPressed : NauiSystemEventCode::KeyReleased, (void*)&data);
+                naui_event_call(pressed ? NauiSystemEventCode_KeyPressed : NauiSystemEventCode_KeyReleased, (void*)&data);
             }
             break;
             

@@ -282,7 +282,7 @@ LRESULT CALLBACK win32_process_message(HWND hwnd, uint32_t msg, WPARAM w_param, 
         case WM_CLOSE:
         {
             NauiQuitEvent data;
-            naui_event_call(NauiSystemEventCode::Quit, (void*)&data);
+            naui_event_call(NauiSystemEventCode_Quit, (void*)&data);
         }
         break;
         case WM_DESTROY:
@@ -313,14 +313,14 @@ LRESULT CALLBACK win32_process_message(HWND hwnd, uint32_t msg, WPARAM w_param, 
 
             NauiKeyEvent data;
             data.key = (NauiKey)w_param;
-            naui_event_call(pressed ? NauiSystemEventCode::KeyPressed : NauiSystemEventCode::KeyReleased, (void*)&data);
+            naui_event_call(pressed ? NauiSystemEventCode_KeyPressed : NauiSystemEventCode_KeyReleased, (void*)&data);
         }
         break;
         case WM_CHAR:
         {
             NauiCharEvent data;
             data.ch = (char)w_param;
-            naui_event_call(NauiSystemEventCode::Char, (void*)&data);
+            naui_event_call(NauiSystemEventCode_Char, (void*)&data);
         }
         break;
         case WM_DROPFILES:
@@ -335,7 +335,7 @@ LRESULT CALLBACK win32_process_message(HWND hwnd, uint32_t msg, WPARAM w_param, 
 
                 NauiFileDropEvent data;
                 data.path = file_path;
-                naui_event_call(NauiSystemEventCode::FileDropped, (void*)&data);
+                naui_event_call(NauiSystemEventCode_FileDropped, (void*)&data);
             }
 
             DragFinish(h_drop);

@@ -38,8 +38,8 @@ int main(const int argc, const char **argv)
     //ImFont *icon_font = io.Fonts->AddFontFromMemoryCompressedTTF((void*)font_awesome_data, font_awesome_size, 16.0f, &icons_config, icon_ranges);
 
     bool is_running = true;
-    naui_event_connect(NauiSystemEventCode::Quit, [&](void *data) { is_running = false; });
-    naui_event_connect(NauiSystemEventCode::FileDropped, [&](void *data) { });
+    naui_event_connect(NauiSystemEventCode_Quit, [&](void *data) { is_running = false; });
+    naui_event_connect(NauiSystemEventCode_FileDropped, [&](void *data) { });
 
 	//naui_panel_init_all();
 
