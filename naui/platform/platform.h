@@ -38,4 +38,4 @@ NAUI_API NauiLibrary naui_load_library(const char *path);
 NAUI_API void naui_unload_library(NauiLibrary library);
 NAUI_API NauiProcAddress naui_get_proc_address(NauiLibrary library, const char *name);
 NAUI_API std::filesystem::path naui_open_file_dialog(const wchar_t* filter, const wchar_t* title);
-NAUI_API std::filesystem::path naui_save_file_dialog(const char* filter, const char* title);
+NAUI_API std::filesystem::path naui_save_file_dialog(const wchar_t* filter, const wchar_t* title);

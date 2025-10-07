@@ -1,6 +1,6 @@
 #include "platform.h"
 
-#if naui_PLATFORM_WINDOWS
+#if NAUI_PLATFORM_WINDOWS
 
 #include "event.h"
 #include "event_types.h"
@@ -346,10 +346,10 @@ LRESULT CALLBACK win32_process_message(HWND hwnd, uint32_t msg, WPARAM w_param, 
     }
 }
 
-std::filesystem::path naui_open_file_dialog(const char* filter, const char* title) 
+std::filesystem::path naui_open_file_dialog(const wchar_t* filter, const wchar_t* title) 
 {
-    OPENFILENAMEA ofn{};
-    char szFile[MAX_PATH] = {0};
+    OPENFILENAMEW ofn{};
+    wchar_t szFile[MAX_PATH] = {0};
 
     ofn.lStructSize  = sizeof(ofn);
     ofn.lpstrFile    = szFile;
@@ -358,16 +358,16 @@ std::filesystem::path naui_open_file_dialog(const char* filter, const char* titl
     ofn.lpstrTitle   = title;
     ofn.Flags        = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
-    if (GetOpenFileNameA(&ofn))
+    if (GetOpenFileNameW(&ofn))
         return std::filesystem::path(ofn.lpstrFile);
 
     return {};
 }
 
-std::filesystem::path naui_save_file_dialog(const char* filter, const char* title) 
+std::filesystem::path naui_save_file_dialog(const wchar_t* filter, const wchar_t* title) 
 {
-    OPENFILENAMEA ofn{};
-    char szFile[MAX_PATH] = {0};
+    OPENFILENAMEW ofn{};
+    wchar_t szFile[MAX_PATH] = {0};
 
     ofn.lStructSize  = sizeof(ofn);
     ofn.lpstrFile    = szFile;
@@ -376,11 +376,10 @@ std::filesystem::path naui_save_file_dialog(const char* filter, const char* titl
     ofn.lpstrTitle   = title;
     ofn.Flags        = OFN_OVERWRITEPROMPT;
 
-    if (GetSaveFileNameA(&ofn))
+    if (GetSaveFileNameW(&ofn))
         return std::filesystem::path(ofn.lpstrFile);
 		
     return {};
 }
-
 
 #endif
