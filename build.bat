@@ -1,1 +1,1 @@
-MsBuild Naui.sln
+MsBuild Naui.sln -property:Configuration=Release

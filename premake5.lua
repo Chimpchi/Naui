@@ -1,44 +1,32 @@
 workspace "Naui"
     configurations { "Release" }
-    startproject "Naui"
-
-project "UVI"
-    kind "StaticLib"
-    architecture "x64"
-    language "C++"
-    cppdialect "C++20"
-    files {
-        "uvi/**.h",
-        "uvi/**.cpp"
-    }
-    filter { "configurations:Release" }
-        defines { "NDEBUG" }
-        optimize "On"
+    startproject "Sandbox"
 
 project "Naui"
-    kind "ConsoleApp"
-    architecture "x64"
+    kind "StaticLib"
     language "C++"
 	cppdialect "C++20"
+	targetdir "bin/%{cfg.buildcfg}"
+
+    architecture "x64"
+
     files {
-        "main/**.h",
-        "main/**.cpp",
+        "naui/**.h",
+        "naui/**.cpp",
         "vendor/imgui/**.h",
         "vendor/imgui/**.cpp"
     }
 
     includedirs {
-        "main",
-        "uvi",
+        "naui",
         "vendor",
         "vendor/imgui",
         "vendor/mINI",
         "vendor/nlohmann"
     }
 
-    filter { "configurations:Release" }
-        defines { "NDEBUG" }
-        optimize "On"
+    defines { "NDEBUG", "NAUI_EXPORT" }
+    optimize "On"
 
     filter "system:windows"
         removefiles {
@@ -57,3 +45,29 @@ project "Naui"
             "vendor/imgui/imgui_impl_dx11.h"
         }
         links { "SDL2", "GL", "dl", "m" }
+
+project "Sandbox"
+    kind "ConsoleApp"
+    language "C++"
+    cppdialect "C++20"
+	targetdir "bin/%{cfg.buildcfg}"
+
+    architecture "x64"
+
+    files {
+        "sandbox/**.h",
+        "sandbox/**.cpp"
+    }
+    includedirs {
+        "naui",
+        "vendor",
+        "vendor/imgui",
+        "vendor/nlohmann"
+    }
+
+    links { "Naui" }
+
+    optimize "On"
+
+    filter { "configurations:Release" }
+        defines { "NDEBUG" }

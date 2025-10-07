@@ -1,6 +1,6 @@
 #include "platform.h"
 
-#if UPH_PLATFORM_WINDOWS
+#if naui_PLATFORM_WINDOWS
 
 #include "event.h"
 #include "event_types.h"
@@ -21,7 +21,7 @@
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
 
-typedef struct UphWin32Platform
+typedef struct NauiWin32Platform
 {
     HINSTANCE h_instance;
     HWND hwnd;
@@ -32,9 +32,9 @@ typedef struct UphWin32Platform
     IDXGISwapChain *swap_chain;
     ID3D11RenderTargetView *render_target_view;
 }
-UphWin32Platform;
+NauiWin32Platform;
 
-static UphWin32Platform *platform;
+static NauiWin32Platform *platform;
 static double clock_frequency;
 static LARGE_INTEGER start_time;
 
@@ -101,9 +101,9 @@ static void cleanup_device_d3d()
     if (platform->device) { platform->device->Release(); platform->device = nullptr; }
 }
 
-void uph_platform_initialize(const UphPlatformCreateInfo *create_info)
+void naui_platform_initialize(const NauiPlatformCreateInfo *create_info)
 {
-    platform = (UphWin32Platform*)malloc(sizeof(UphWin32Platform));
+    platform = (NauiWin32Platform*)malloc(sizeof(NauiWin32Platform));
     platform->h_instance = GetModuleHandleA(0);
 
     ImGui_ImplWin32_EnableDpiAwareness();
@@ -119,7 +119,7 @@ void uph_platform_initialize(const UphPlatformCreateInfo *create_info)
     wc.hIcon = icon;
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     wc.hbrBackground = NULL;
-    wc.lpszClassName = "uph_window_class";
+    wc.lpszClassName = "naui_window_class";
 
     RegisterClassA(&wc);
 
@@ -161,24 +161,24 @@ void uph_platform_initialize(const UphPlatformCreateInfo *create_info)
     wc = {0};
     wc.lpfnWndProc = DefWindowProc;
     wc.hInstance = platform->h_instance;
-    wc.lpszClassName = "uph_child_window_class";
+    wc.lpszClassName = "naui_child_window_class";
     RegisterClassA(&wc);
 }
 
-void uph_platform_shutdown(void)
+void naui_platform_shutdown(void)
 {
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
 
     cleanup_device_d3d();
     DestroyWindow(platform->hwnd);
-    UnregisterClassA("uph_window_class", platform->h_instance);
-    UnregisterClassA("uph_child_window_class", platform->h_instance);
+    UnregisterClassA("naui_window_class", platform->h_instance);
+    UnregisterClassA("naui_child_window_class", platform->h_instance);
 
     free(platform);
 }
 
-void uph_platform_begin(void)
+void naui_platform_begin(void)
 {
     MSG msg;
     while (PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
@@ -191,7 +191,7 @@ void uph_platform_begin(void)
     ImGui_ImplWin32_NewFrame();
 }
 
-void uph_platform_end(void)
+void naui_platform_end(void)
 {
     const float clear_color[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
     platform->device_context->OMSetRenderTargets(1, &platform->render_target_view, NULL);
@@ -201,23 +201,23 @@ void uph_platform_end(void)
     platform->swap_chain->Present(1, 0);
 }
 
-double uph_get_time(void)
+double naui_get_time(void)
 {
     LARGE_INTEGER now_time;
     QueryPerformanceCounter(&now_time);
     return (double)(now_time.QuadPart - start_time.QuadPart) * clock_frequency;
 }
 
-UphChildWindow uph_create_child_window(const UphChildWindowCreateInfo *create_info)
+NauiChildWindow naui_create_child_window(const NauiChildWindowCreateInfo *create_info)
 {
-    UphChildWindow window;
+    NauiChildWindow window;
 
     WCHAR wide_title[128];
     create_wide_string_from_utf8(create_info->title, wide_title);
 
     HWND hwndPlugin = CreateWindowExA(
         0,
-        "uph_child_window_class",
+        "naui_child_window_class",
         (LPCSTR)wide_title,
         WS_OVERLAPPED | WS_MINIMIZEBOX | WS_SYSMENU,
         CW_USEDEFAULT, CW_USEDEFAULT,
@@ -248,24 +248,24 @@ UphChildWindow uph_create_child_window(const UphChildWindowCreateInfo *create_in
     return window;
 }
 
-void uph_destroy_child_window(const UphChildWindow *window)
+void naui_destroy_child_window(const NauiChildWindow *window)
 {
     DestroyWindow((HWND)window->handle);
 }
 
-UphLibrary uph_load_library(const char *path)
+NauiLibrary naui_load_library(const char *path)
 {
-    return (UphLibrary)LoadLibraryA(path);
+    return (NauiLibrary)LoadLibraryA(path);
 }
 
-void uph_unload_library(UphLibrary library)
+void naui_unload_library(NauiLibrary library)
 {
     FreeLibrary((HMODULE)library);
 }
 
-UphProcAddress uph_get_proc_address(UphLibrary library, const char *name)
+NauiProcAddress naui_get_proc_address(NauiLibrary library, const char *name)
 {
-    return (UphProcAddress)GetProcAddress((HMODULE)library, name);
+    return (NauiProcAddress)GetProcAddress((HMODULE)library, name);
 }
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -281,8 +281,8 @@ LRESULT CALLBACK win32_process_message(HWND hwnd, uint32_t msg, WPARAM w_param, 
         break;
         case WM_CLOSE:
         {
-            UphQuitEvent data;
-            uph_event_call(UphSystemEventCode::Quit, (void*)&data);
+            NauiQuitEvent data;
+            naui_event_call(NauiSystemEventCode::Quit, (void*)&data);
         }
         break;
         case WM_DESTROY:
@@ -311,16 +311,16 @@ LRESULT CALLBACK win32_process_message(HWND hwnd, uint32_t msg, WPARAM w_param, 
         {
             bool pressed = (msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN);
 
-            UphKeyEvent data;
-            data.key = (UphKey)w_param;
-            uph_event_call(pressed ? UphSystemEventCode::KeyPressed : UphSystemEventCode::KeyReleased, (void*)&data);
+            NauiKeyEvent data;
+            data.key = (NauiKey)w_param;
+            naui_event_call(pressed ? NauiSystemEventCode::KeyPressed : NauiSystemEventCode::KeyReleased, (void*)&data);
         }
         break;
         case WM_CHAR:
         {
-            UphCharEvent data;
+            NauiCharEvent data;
             data.ch = (char)w_param;
-            uph_event_call(UphSystemEventCode::Char, (void*)&data);
+            naui_event_call(NauiSystemEventCode::Char, (void*)&data);
         }
         break;
         case WM_DROPFILES:
@@ -333,9 +333,9 @@ LRESULT CALLBACK win32_process_message(HWND hwnd, uint32_t msg, WPARAM w_param, 
                 char file_path[MAX_PATH];
                 DragQueryFileA(h_drop, i, file_path, MAX_PATH);
 
-                UphFileDropEvent data;
+                NauiFileDropEvent data;
                 data.path = file_path;
-                uph_event_call(UphSystemEventCode::FileDropped, (void*)&data);
+                naui_event_call(NauiSystemEventCode::FileDropped, (void*)&data);
             }
 
             DragFinish(h_drop);
@@ -346,7 +346,7 @@ LRESULT CALLBACK win32_process_message(HWND hwnd, uint32_t msg, WPARAM w_param, 
     }
 }
 
-std::filesystem::path uph_open_file_dialog(const char* filter, const char* title) 
+std::filesystem::path naui_open_file_dialog(const char* filter, const char* title) 
 {
     OPENFILENAMEA ofn{};
     char szFile[MAX_PATH] = {0};
@@ -364,7 +364,7 @@ std::filesystem::path uph_open_file_dialog(const char* filter, const char* title
     return {};
 }
 
-std::filesystem::path uph_save_file_dialog(const char* filter, const char* title) 
+std::filesystem::path naui_save_file_dialog(const char* filter, const char* title) 
 {
     OPENFILENAMEA ofn{};
     char szFile[MAX_PATH] = {0};

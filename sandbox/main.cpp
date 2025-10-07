@@ -9,7 +9,7 @@
 
 int main(const int argc, const char **argv)
 {
-    UphPlatformCreateInfo create_info = { 1920, 1080, "Naui" };
+    NauiPlatformCreateInfo create_info = { 1920, 1080, "Naui" };
 
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
@@ -17,15 +17,15 @@ int main(const int argc, const char **argv)
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     io.IniFilename = nullptr;
 
-    //uph_json_load_theme("themes/Default.json");
-    uph_platform_initialize(&create_info);
-    //uph_load_layout("layouts/Default");
-	//uph_project_init();
+    //naui_json_load_theme("themes/Default.json");
+    naui_platform_initialize(&create_info);
+    //naui_load_layout("layouts/Default");
+	//naui_project_init();
 
-	//std::vector<std::filesystem::path> recovery_candidates = uph_project_check_recovery();
+	//std::vector<std::filesystem::path> recovery_candidates = naui_project_check_recovery();
 	// if(!recovery_candidates.empty())
 	// {
-	// 	uph_panel_show("Recover Project");
+	// 	naui_panel_show("Recover Project");
 	// }
 
     static const ImWchar icon_ranges[]{0xf000, 0xf3ff, 0};
@@ -38,29 +38,29 @@ int main(const int argc, const char **argv)
     //ImFont *icon_font = io.Fonts->AddFontFromMemoryCompressedTTF((void*)font_awesome_data, font_awesome_size, 16.0f, &icons_config, icon_ranges);
 
     bool is_running = true;
-    uph_event_connect(UphSystemEventCode::Quit, [&](void *data) { is_running = false; });
-    uph_event_connect(UphSystemEventCode::FileDropped, [&](void *data) { });
+    naui_event_connect(NauiSystemEventCode::Quit, [&](void *data) { is_running = false; });
+    naui_event_connect(NauiSystemEventCode::FileDropped, [&](void *data) { });
 
-	//uph_panel_init_all();
+	//naui_panel_init_all();
 
     while (is_running)
     {
-        uph_platform_begin();
+        naui_platform_begin();
         ImGui::NewFrame();
         ImGui::DockSpaceOverViewport();
-        //uph_panel_render_all();
+        //naui_panel_render_all();
         ImGui::Render();
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
         {
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
         }
-        uph_platform_end();
-		//uph_layout_process_requests();
+        naui_platform_end();
+		//naui_layout_process_requests();
     }
 
-	//uph_project_shutdown();
-    uph_platform_shutdown();
+	//naui_project_shutdown();
+    naui_platform_shutdown();
     ImGui::DestroyContext();
     return 0;
 }

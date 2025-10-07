@@ -1,6 +1,6 @@
 #pragma once
 
-enum class UphMouseButton
+enum class NauiMouseButton
 {
     Left,
     Right,
@@ -8,7 +8,7 @@ enum class UphMouseButton
     MaxButtons
 };
 
-enum class UphKey
+enum class NauiKey
 {
     Backspace = 0x08,
     Enter = 0x0D,

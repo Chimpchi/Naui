@@ -1884,7 +1884,7 @@ void ImGui::ShrinkWidths(ImGuiShrinkWidthItem* items, int count, float width_exc
 //-------------------------------------------------------------------------
 // [SECTION] Widgets: ComboBox
 //-------------------------------------------------------------------------
-// - CalcMaxPopupHeightFromItemCount() [Internal]
+// - CalcMaxPopNauieightFromItemCount() [Internal]
 // - BeginCombo()
 // - BeginComboPopup() [Internal]
 // - EndCombo()
@@ -1893,7 +1893,7 @@ void ImGui::ShrinkWidths(ImGuiShrinkWidthItem* items, int count, float width_exc
 // - Combo()
 //-------------------------------------------------------------------------
 
-static float CalcMaxPopupHeightFromItemCount(int items_count)
+static float CalcMaxPopNauieightFromItemCount(int items_count)
 {
     ImGuiContext& g = *GImGui;
     if (items_count <= 0)
@@ -2007,7 +2007,7 @@ bool ImGui::BeginComboPopup(ImGuiID popup_id, const ImRect& bb, ImGuiComboFlags 
         if ((g.NextWindowData.HasFlags & ImGuiNextWindowDataFlags_HasSize) == 0 || g.NextWindowData.SizeVal.x <= 0.0f) // Don't apply constraints if user specified a size
             constraint_min.x = w;
         if ((g.NextWindowData.HasFlags & ImGuiNextWindowDataFlags_HasSize) == 0 || g.NextWindowData.SizeVal.y <= 0.0f)
-            constraint_max.y = CalcMaxPopupHeightFromItemCount(popup_max_height_in_items);
+            constraint_max.y = CalcMaxPopNauieightFromItemCount(popup_max_height_in_items);
         SetNextWindowSizeConstraints(constraint_min, constraint_max);
     }
 
@@ -2140,7 +2140,7 @@ bool ImGui::Combo(const char* label, int* current_item, const char* (*getter)(vo
 
     // The old Combo() API exposed "popup_max_height_in_items". The new more general BeginCombo() API doesn't have/need it, but we emulate it here.
     if (popup_max_height_in_items != -1 && !(g.NextWindowData.HasFlags & ImGuiNextWindowDataFlags_HasSizeConstraint))
-        SetNextWindowSizeConstraints(ImVec2(0, 0), ImVec2(FLT_MAX, CalcMaxPopupHeightFromItemCount(popup_max_height_in_items)));
+        SetNextWindowSizeConstraints(ImVec2(0, 0), ImVec2(FLT_MAX, CalcMaxPopNauieightFromItemCount(popup_max_height_in_items)));
 
     if (!BeginCombo(label, preview_value, ImGuiComboFlags_None))
         return false;

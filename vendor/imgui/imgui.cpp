@@ -8828,7 +8828,7 @@ bool ImGui::IsWindowHovered(ImGuiHoveredFlags flags)
     if ((flags & ImGuiHoveredFlags_AnyWindow) == 0)
     {
         IM_ASSERT(cur_window); // Not inside a Begin()/End()
-        const bool popup_hierarchy = (flags & ImGuiHoveredFlags_NoPopupHierarchy) == 0;
+        const bool popup_hierarchy = (flags & ImGuiHoveredFlags_NoPopNauiierarchy) == 0;
         const bool dock_hierarchy = (flags & ImGuiHoveredFlags_DockHierarchy) != 0;
         if (flags & ImGuiHoveredFlags_RootWindow)
             cur_window = GetCombinedRootWindow(cur_window, popup_hierarchy, dock_hierarchy);
@@ -12164,7 +12164,7 @@ void ImGui::BeginGroup()
     group_data.BackupCurrLineSize = window->DC.CurrLineSize;
     group_data.BackupCurrLineTextBaseOffset = window->DC.CurrLineTextBaseOffset;
     group_data.BackupActiveIdIsAlive = g.ActiveIdIsAlive;
-    group_data.BackupHoveredIdIsAlive = g.HoveredId != 0;
+    group_data.BackNauioveredIdIsAlive = g.HoveredId != 0;
     group_data.BackupIsSameLine = window->DC.IsSameLine;
     group_data.BackupDeactivatedIdIsAlive = g.DeactivatedItemData.IsAlive;
     group_data.EmitItem = true;
@@ -12225,7 +12225,7 @@ void ImGui::EndGroup()
     g.LastItemData.Rect = group_bb;
 
     // Forward Hovered flag
-    const bool group_contains_curr_hovered_id = (group_data.BackupHoveredIdIsAlive == false) && g.HoveredId != 0;
+    const bool group_contains_curr_hovered_id = (group_data.BackNauioveredIdIsAlive == false) && g.HoveredId != 0;
     if (group_contains_curr_hovered_id)
         g.LastItemData.StatusFlags |= ImGuiItemStatusFlags_HoveredWindow;
 
@@ -13277,7 +13277,7 @@ bool ImGui::IsWindowFocused(ImGuiFocusedFlags flags)
         return true;
 
     IM_ASSERT(cur_window); // Not inside a Begin()/End()
-    const bool popup_hierarchy = (flags & ImGuiFocusedFlags_NoPopupHierarchy) == 0;
+    const bool popup_hierarchy = (flags & ImGuiFocusedFlags_NoPopNauiierarchy) == 0;
     const bool dock_hierarchy = (flags & ImGuiFocusedFlags_DockHierarchy) != 0;
     if (flags & ImGuiFocusedFlags_RootWindow)
         cur_window = GetCombinedRootWindow(cur_window, popup_hierarchy, dock_hierarchy);
@@ -18571,7 +18571,7 @@ static void ImGui::DockNodeUpdateForRootNode(ImGuiDockNode* node)
     }
 }
 
-static void DockNodeSetupHostWindow(ImGuiDockNode* node, ImGuiWindow* host_window)
+static void DockNodeSetNauiostWindow(ImGuiDockNode* node, ImGuiWindow* host_window)
 {
     // Remove ourselves from any previous different host window
     // This can happen if a user mistakenly does (see #4295 for details):
@@ -18744,7 +18744,7 @@ static void ImGui::DockNodeUpdate(ImGuiDockNode* node)
             beginned_into_host_window = true;
 
             host_window = g.CurrentWindow;
-            DockNodeSetupHostWindow(node, host_window);
+            DockNodeSetNauiostWindow(node, host_window);
             host_window->DC.CursorPos = host_window->Pos;
             node->Pos = host_window->Pos;
             node->Size = host_window->Size;
@@ -20160,7 +20160,7 @@ ImGuiID ImGui::DockSpace(ImGuiID dockspace_id, const ImVec2& size_arg, ImGuiDock
     PopStyleVar();
 
     ImGuiWindow* host_window = g.CurrentWindow;
-    DockNodeSetupHostWindow(node, host_window);
+    DockNodeSetNauiostWindow(node, host_window);
     host_window->ChildId = window->GetID(title);
     node->OnlyNodeWithWindows = NULL;
 
