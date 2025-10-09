@@ -27,12 +27,12 @@ void naui_save_layout(const char* name) {
     std::ofstream out(filename, std::ios::app);
     out << "\n[" << LAYOUT_IDENTIFIER << "]\n";
 
-    for (auto& panel : panels()) {
-        if (panel.window_flags & ImGuiWindowFlags_NoSavedSettings)
-            continue;
+    // for (auto& panel : panels()) {
+    //     if (panel.window_flags & ImGuiWindowFlags_NoSavedSettings)
+    //         continue;
 
-        out << panel.title << (panel.is_visible ? "=1\n" : "=0\n");
-    }
+    //     out << panel.title << (panel.is_visible ? "=1\n" : "=0\n");
+    // }
 }
 
 bool naui_load_layout(const char* name) {
@@ -49,13 +49,13 @@ bool naui_load_layout(const char* name) {
     file.read(ini);
 
     auto& section = ini[LAYOUT_IDENTIFIER];
-    for (NauiPanel& panel : panels()) {
-        if (!section.has(panel.title)) {
-            panel.is_visible = false;
-            continue;
-        }
-        panel.is_visible = (section[panel.title] == "1");
-    }
+    // for (NauiPanel& panel : panels()) {
+    //     if (!section.has(panel.title)) {
+    //         panel.is_visible = false;
+    //         continue;
+    //     }
+    //     panel.is_visible = (section[panel.title] == "1");
+    // }
 
     return true;
 }
