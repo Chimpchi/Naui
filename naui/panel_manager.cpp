@@ -22,7 +22,7 @@ static NauiArena arena;
 
 void naui_panel_manager_initialize(void)
 {
-    naui_create_arena(arena, 1 << 16);
+    naui_create_arena(arena, NAUI_MAX_PANEL_SCRATCH_SIZE);
 }
 
 void naui_panel_manager_shutdown(void)
@@ -98,12 +98,11 @@ NauiPanelInstance &naui_create_panel(const char *layer, const char *title)
     return panel;
 }
 
-NauiPanelInstance* naui_get_first_panel_of_layer(const char *layer)
+NauiPanelInstance &naui_get_first_panel_of_layer(const char *layer)
 {
     for (NauiPanelInstance &panel : panels)
         if (strcmp(panel.layer, layer) == 0)
-            return &panel;
-    return nullptr;
+            return panel;
 }
 
 std::vector<NauiPanelInstance*> &naui_get_all_panels_of_layer(const char *layer)
