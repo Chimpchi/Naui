@@ -5,13 +5,17 @@
 #include "event.h"
 #include "event_types.h"
 
+#include <stb_image.h>
+
 #include <cstdint>
 #include <assert.h>
 
 #include <windows.h>
 #include <windowsx.h>
 
-#include <imgui.h>
+#include <dwmapi.h>
+#pragma comment(lib, "dwmapi.lib")
+
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx11.h>
 
@@ -35,8 +39,6 @@ typedef struct NauiWin32Platform
 NauiWin32Platform;
 
 static NauiWin32Platform *platform;
-static double clock_frequency;
-static LARGE_INTEGER start_time;
 
 LRESULT CALLBACK win32_process_message(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
@@ -101,12 +103,55 @@ static void cleanup_device_d3d()
     if (platform->device) { platform->device->Release(); platform->device = nullptr; }
 }
 
-void naui_platform_initialize(const NauiPlatformCreateInfo *create_info)
+static void naui_apply_window_style(uint32_t *style, uint32_t *ex_style, NauiPlatformWindowFlags flags)
 {
-    platform = (NauiWin32Platform*)malloc(sizeof(NauiWin32Platform));
+    *style = WS_OVERLAPPEDWINDOW | WS_SYSMENU | WS_CAPTION;
+    *ex_style = WS_EX_APPWINDOW;
+
+    if (flags & NauiPlatformWindowFlags_Resizeable)
+        *style |= WS_THICKFRAME | WS_MAXIMIZEBOX;
+    if (flags & NauiPlatformWindowFlags_Minimizable)
+        *style |= WS_MINIMIZEBOX;
+    if (flags & NauiPlatformWindowFlags_Closable)
+        *ex_style |= WS_EX_OVERLAPPEDWINDOW;
+}
+
+static bool set_window_titlebar_dark_mode(HWND hwnd, bool enabled)
+{
+    if (!hwnd)
+        return false;
+
+    BOOL useDark = enabled ? TRUE : FALSE;
+
+    // Try attribute 20 (Windows 10 1809)
+    HRESULT hr = DwmSetWindowAttribute(
+        hwnd,
+        20,
+        &useDark,
+        sizeof(useDark)
+    );
+
+    // If that fails, try attribute 19 (Windows 11)
+    if (FAILED(hr))
+    {
+        hr = DwmSetWindowAttribute(
+            hwnd,
+            19,
+            &useDark,
+            sizeof(useDark)
+        );
+    }
+
+    return SUCCEEDED(hr);
+}
+
+void naui_platform_initialize(const NauiWindowProps &props)
+{
+    platform = new NauiWin32Platform;
     platform->h_instance = GetModuleHandleA(0);
 
     ImGui_ImplWin32_EnableDpiAwareness();
+    float main_scale = ImGui_ImplWin32_GetDpiScaleForMonitor(::MonitorFromPoint(POINT{ 0, 0 }, MONITOR_DEFAULTTOPRIMARY));
 
     HICON icon = LoadIcon(platform->h_instance, IDI_APPLICATION);
     WNDCLASSA wc;
@@ -123,20 +168,17 @@ void naui_platform_initialize(const NauiPlatformCreateInfo *create_info)
 
     RegisterClassA(&wc);
 
-    RECT wr = { 0, 0, (LONG)create_info->width, (LONG)create_info->height };
-    AdjustWindowRect(&wr, WS_OVERLAPPEDWINDOW, FALSE);
+    uint32_t window_style, window_ex_style;
+    naui_apply_window_style(&window_style, &window_ex_style, props.flags);
 
     WCHAR wide_title[128];
-    create_wide_string_from_utf8(create_info->title, wide_title);
+    create_wide_string_from_utf8(props.title, wide_title);
 
-    platform->hwnd = CreateWindowA(
-        wc.lpszClassName, (LPCSTR)wide_title,
-        WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
-        wr.right - wr.left, wr.bottom - wr.top,
+    platform->hwnd = CreateWindowExA(
+        window_ex_style, "naui_window_class", (LPCSTR)wide_title,
+        window_style, CW_USEDEFAULT, CW_USEDEFAULT,
+        props.width, props.height,
         NULL, NULL, wc.hInstance, NULL);
-
-    platform->window_width = create_info->width;
-    platform->window_height = create_info->height;
 
     if (!create_device_d3d(platform->hwnd))
     {
@@ -145,15 +187,15 @@ void naui_platform_initialize(const NauiPlatformCreateInfo *create_info)
         return;
     }
 
+    set_window_titlebar_dark_mode(platform->hwnd, true);
     ShowWindow(platform->hwnd, SW_SHOWDEFAULT);
     UpdateWindow(platform->hwnd);
 
     DragAcceptFiles(platform->hwnd, TRUE);
 
-    LARGE_INTEGER frequency;
-    QueryPerformanceFrequency(&frequency);
-    clock_frequency = 1.0 / (double)frequency.QuadPart;
-    QueryPerformanceCounter(&start_time);
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.ScaleAllSizes(main_scale);
+    style.FontScaleDpi = main_scale; 
 
     ImGui_ImplWin32_Init(platform->hwnd);
     ImGui_ImplDX11_Init(platform->device, platform->device_context);
@@ -175,25 +217,28 @@ void naui_platform_shutdown(void)
     UnregisterClassA("naui_window_class", platform->h_instance);
     UnregisterClassA("naui_child_window_class", platform->h_instance);
 
-    free(platform);
+    delete platform;
 }
 
 void naui_platform_begin(void)
 {
     MSG msg;
-    while (PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
+    while (PeekMessageA(&msg, NULL, 0U, 0U, PM_REMOVE))
     {
         TranslateMessage(&msg);
-        DispatchMessage(&msg);
+        DispatchMessageA(&msg);
     }
 
-    ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
+    ImGui_ImplDX11_NewFrame();
 }
 
 void naui_platform_end(void)
 {
-    const float clear_color[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
+    ImGui::UpdatePlatformWindows();
+    ImGui::RenderPlatformWindowsDefault();
+
+    const float clear_color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
     platform->device_context->OMSetRenderTargets(1, &platform->render_target_view, NULL);
     platform->device_context->ClearRenderTargetView(platform->render_target_view, clear_color);
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
@@ -201,56 +246,36 @@ void naui_platform_end(void)
     platform->swap_chain->Present(1, 0);
 }
 
-double naui_get_time(void)
+NauiChildWindow naui_create_child_window(const NauiWindowProps &props)
 {
-    LARGE_INTEGER now_time;
-    QueryPerformanceCounter(&now_time);
-    return (double)(now_time.QuadPart - start_time.QuadPart) * clock_frequency;
-}
-
-NauiChildWindow naui_create_child_window(const NauiChildWindowCreateInfo *create_info)
-{
-    NauiChildWindow window;
-
     WCHAR wide_title[128];
-    create_wide_string_from_utf8(create_info->title, wide_title);
+    create_wide_string_from_utf8(props.title, wide_title);
+
+    uint32_t window_style, window_ex_style;
+    naui_apply_window_style(&window_style, &window_ex_style, props.flags);
 
     HWND hwndPlugin = CreateWindowExA(
-        0,
+        window_ex_style,
         "naui_child_window_class",
         (LPCSTR)wide_title,
-        WS_OVERLAPPED | WS_MINIMIZEBOX | WS_SYSMENU,
+        window_style,
         CW_USEDEFAULT, CW_USEDEFAULT,
-        create_info->width, create_info->height + 32,
+        props.width, props.height + 32,
         platform->hwnd,
         NULL,
         platform->h_instance,
         NULL
     );
 
-    LONG style = GetWindowLong(hwndPlugin, GWL_STYLE);
-    style &= ~WS_MAXIMIZEBOX;
-    style &= ~WS_SIZEBOX;
-    SetWindowLong(hwndPlugin, GWL_STYLE, style);
-
-    HMENU hSysMenu = GetSystemMenu(hwndPlugin, FALSE);
-    if (hSysMenu)
-        DeleteMenu(hSysMenu, SC_CLOSE, MF_BYCOMMAND);
-
-    LONG exStyle = GetWindowLong(hwndPlugin, GWL_EXSTYLE);
-    SetWindowLong(hwndPlugin, GWL_EXSTYLE, exStyle);
-
     ShowWindow(hwndPlugin, SW_SHOWDEFAULT);
     UpdateWindow(hwndPlugin);
 
-    window.handle = hwndPlugin;
-
-    return window;
+    return (NauiChildWindow)hwndPlugin;
 }
 
 void naui_destroy_child_window(const NauiChildWindow *window)
 {
-    DestroyWindow((HWND)window->handle);
+    DestroyWindow((HWND)window);
 }
 
 NauiLibrary naui_load_library(const char *path)
@@ -288,19 +313,40 @@ LRESULT CALLBACK win32_process_message(HWND hwnd, uint32_t msg, WPARAM w_param, 
         case WM_DESTROY:
             PostQuitMessage(0);
             return 0;
+        case WM_NCCALCSIZE:
+        {
+            if (w_param == TRUE)
+            {
+                LRESULT result = DefWindowProc(hwnd, msg, w_param, l_param);
+                
+                if (IsMaximized(hwnd))
+                {
+                    NCCALCSIZE_PARAMS* params = (NCCALCSIZE_PARAMS*)l_param;
+                    params->rgrc[0].left -= 2;
+                    params->rgrc[0].right += 2;
+                    params->rgrc[0].bottom += 2;
+                }
+                return result;
+            }
+            return DefWindowProc(hwnd, msg, w_param, l_param);
+        }
         case WM_SIZE:
         {
             RECT r;
             GetClientRect(hwnd, &r);
 
-            platform->window_width = r.right - r.left; 
-            platform->window_height = r.bottom - r.top; 
+            const uint32_t width = r.right - r.left; 
+            const uint32_t height = r.bottom - r.top; 
 
-            if (platform && platform->device != NULL && w_param != SIZE_MINIMIZED)
+            if (w_param != SIZE_MINIMIZED)
             {
                 cleanup_render_target();
-                platform->swap_chain->ResizeBuffers(0, (UINT)LOWORD(l_param), (UINT)HIWORD(l_param), DXGI_FORMAT_UNKNOWN, 0);
+                platform->swap_chain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
                 create_render_target();
+                NauiResizeEvent data;
+                data.width = width;
+                data.height = height;
+                //naui_event_call(NauiSystemEventCode_Resize, (void*)&data);
             }
         }
         break;
@@ -341,9 +387,8 @@ LRESULT CALLBACK win32_process_message(HWND hwnd, uint32_t msg, WPARAM w_param, 
             DragFinish(h_drop);
         }
         break;
-        default:
-            return DefWindowProc(hwnd, msg, w_param, l_param);
     }
+    return DefWindowProc(hwnd, msg, w_param, l_param);
 }
 
 std::filesystem::path naui_open_file_dialog(const wchar_t* filter, const wchar_t* title) 
@@ -380,6 +425,67 @@ std::filesystem::path naui_save_file_dialog(const wchar_t* filter, const wchar_t
         return std::filesystem::path(ofn.lpstrFile);
 		
     return {};
+}
+
+NauiImage naui_create_image(const char *path)
+{
+    int width, height, channels;
+    unsigned char* image_data = stbi_load(path, &width, &height, &channels, 0);
+    if (!image_data)
+    {
+        fprintf(stderr, "[Naui] Failed to load image!\n");
+        return{};
+    }
+
+    ID3D11Texture2D* texture;
+    D3D11_TEXTURE2D_DESC desc{};
+    desc.Width = width;
+    desc.Height = height;
+    desc.MipLevels = 1;
+    desc.ArraySize = 1;
+    desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    desc.SampleDesc.Count = 1;
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    desc.CPUAccessFlags = 0;
+    desc.MiscFlags = 0;
+
+    D3D11_SUBRESOURCE_DATA subResource{};
+    subResource.pSysMem = image_data;
+    subResource.SysMemPitch = width * channels;
+
+    HRESULT hr = platform->device->CreateTexture2D(&desc, &subResource, &texture);
+    stbi_image_free(image_data);
+
+    if (FAILED(hr))
+    {
+        fprintf(stderr, "[Naui] Failed to create texture from image!\n");
+        return{};
+    }
+
+    ID3D11ShaderResourceView* texture_view = nullptr;
+    hr = platform->device->CreateShaderResourceView(texture, nullptr, &texture_view);
+    texture->Release();
+    if (FAILED(hr)) 
+    {
+        fprintf(stderr, "[Naui] Failed to create shader resource view!\n");
+        return{};
+    }
+
+    NauiImage image;
+    image.width = width;
+    image.height = height;
+
+    image.internal.d3d11_texture = texture;
+    image.internal.d3d11_texture_view = texture_view;
+
+    return image;
+}
+
+void naui_destroy_image(const NauiImage *image)
+{
+    ((ID3D11Texture2D*)image->internal.d3d11_texture)->Release();
+    ((ID3D11ShaderResourceView*)image->internal.d3d11_texture_view)->Release();
 }
 
 #endif

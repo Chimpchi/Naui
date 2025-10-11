@@ -38,8 +38,6 @@ typedef struct NauiSdl2Platform
 NauiSdl2Platform;
 
 static NauiSdl2Platform *platform;
-static double clock_frequency = 0.0000000001;
-static struct timespec start_time;
 
 void naui_platform_initialize(const NauiPlatformCreateInfo *create_info)
 {
@@ -73,9 +71,6 @@ void naui_platform_initialize(const NauiPlatformCreateInfo *create_info)
     
     ImGui_ImplSDL2_InitForOpenGL(platform->window, platform->gl_context);
     ImGui_ImplOpenGL3_Init("#version 330 core");
-    
-    // time
-    clock_gettime(CLOCK_MONOTONIC, &start_time);
 }
 
 void naui_platform_shutdown(void)
@@ -160,13 +155,6 @@ NauiLibrary naui_load_library(const char *path)
 NauiProcAddress naui_get_proc_address(NauiLibrary library, const char *name)
 {
     return (NauiProcAddress)dlsym((void*)library, name);
-}
-
-double naui_get_time(void)
-{
-    struct timespec now_time;
-    clock_gettime(CLOCK_MONOTONIC, &now_time);
-    return (double)(now_time.tv_sec - start_time.tv_sec) + (now_time.tv_nsec - start_time.tv_nsec) * clock_frequency;
 }
 
 #endif

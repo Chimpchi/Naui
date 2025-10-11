@@ -13,6 +13,7 @@ enum NauiSystemEventCode : uint8_t
     NauiSystemEventCode_KeyReleased,
     NauiSystemEventCode_Char,
     NauiSystemEventCode_FileDropped,
+    NauiSystemEventCode_Resize,
     NauiSystemEventCode_MAX
 };
 

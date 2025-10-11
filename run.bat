@@ -1,3 +1,3 @@
 cd bin\Release
-Sandbox.exe
+Application.exe
 cd ..

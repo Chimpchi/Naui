@@ -1,6 +1,6 @@
 workspace "Naui"
     configurations { "Release" }
-    startproject "Sandbox"
+    startproject "Application"
 
 project "Naui"
     kind "SharedLib"
@@ -9,60 +9,47 @@ project "Naui"
 	targetdir "bin/%{cfg.buildcfg}"
 
     architecture "x64"
+    staticruntime "Off"
 
     files {
         "naui/**.h",
         "naui/**.cpp",
-        "vendor/imgui/**.h",
-        "vendor/imgui/**.cpp"
+        "naui/vendor/stb/**.h",
+        "naui/vendor/stb/**.c",
+        "naui/vendor/imgui/**.h",
+        "naui/vendor/imgui/**.cpp"
     }
 
     includedirs {
         "naui",
-        "vendor",
-        "vendor/imgui",
-        "vendor/mINI",
-        "vendor/nlohmann"
+        "naui/vendor",
+        "naui/vendor/stb",
+        "naui/vendor/imgui",
+        "naui/vendor/mINI",
+        "naui/vendor/nlohmann"
     }
 
-    defines { "NDEBUG", "IMGUI_BUILD_DLL", "NAUI_EXPORT" }
+    defines { "NDEBUG", "NAUI_EXPORT", "IMGUI_BUILD_DLL" }
     optimize "On"
 
-    filter "system:windows"
-        removefiles {
-            "vendor/imgui/imgui_impl_sdl2.cpp",
-            "vendor/imgui/imgui_impl_sdl2.h",
-            "vendor/imgui/imgui_impl_opengl3_loader.cpp",
-            "vendor/imgui/imgui_impl_opengl3.h",
-            "vendor/imgui/imgui_impl_opengl3.cpp"
-        }
-
-    filter "system:linux"
-        removefiles {
-            "vendor/imgui/imgui_impl_win32.cpp",
-            "vendor/imgui/imgui_impl_win32.h",
-            "vendor/imgui/imgui_impl_dx11.cpp",
-            "vendor/imgui/imgui_impl_dx11.h"
-        }
-        links { "SDL2", "GL", "dl", "m" }
-
-project "Sandbox"
+project "Application"
     kind "ConsoleApp"
     language "C++"
     cppdialect "C++20"
 	targetdir "bin/%{cfg.buildcfg}"
 
     architecture "x64"
+    staticruntime "Off"
 
     files {
-        "sandbox/**.h",
-        "sandbox/**.cpp"
+        "main/**.h",
+        "main/**.cpp"
     }
     includedirs {
         "naui",
-        "vendor",
-        "vendor/imgui",
-        "vendor/nlohmann"
+        "naui/vendor",
+        "naui/vendor/imgui",
+        "naui/vendor/nlohmann"
     }
 
     links { "Naui" }

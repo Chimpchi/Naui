@@ -1,0 +1,45 @@
+#pragma once
+
+#include <base.h>
+#include <imgui.h>
+
+#include <cstddef>
+#include <cstdint>
+#include <vector>
+
+enum NauiPanelType
+{
+    NauiPanelType_Panel,
+    NauiPanelType_Popup,
+    NauiPanelType_Modal
+};
+
+typedef void (*NauiPanelFn)(struct NauiPanelInstance &panel);
+struct NauiPanelInstance
+{
+    NauiPanelType type = NauiPanelType_Panel;
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
+
+    ImVec2 default_size = ImVec2(300, 300);
+    ImVec2 min_size = ImVec2(0, 0);
+    ImVec2 max_size = ImVec2(FLT_MAX, FLT_MAX);
+
+    const char *title;
+    const char *layer;
+    void *data;
+
+    bool is_open = true;
+
+    NauiPanelFn create;
+    NauiPanelFn render;
+};
+
+NAUI_API void naui_panel_manager_initialize(void);
+NAUI_API void naui_panel_manager_shutdown(void);
+NAUI_API void naui_panel_manager_render(void);
+
+NAUI_API void naui_register_panel_layer(const char *layer, NauiPanelType type, NauiPanelFn create = nullptr, NauiPanelFn render = nullptr, size_t data_size = 0);
+
+NAUI_API NauiPanelInstance &naui_create_panel(const char *layer, const char *title);
+NAUI_API NauiPanelInstance* naui_get_first_panel_of_layer(const char *layer);
+NAUI_API std::vector<NauiPanelInstance*> &naui_get_all_panels_of_layer(const char *layer);
