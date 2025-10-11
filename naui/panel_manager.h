@@ -7,6 +7,10 @@
 #include <cstdint>
 #include <vector>
 
+#ifndef NAUI_MAX_PANEL_SCRATCH_SIZE
+    #define NAUI_MAX_PANEL_SCRATCH_SIZE (1 << 16)
+#endif
+
 enum NauiPanelType
 {
     NauiPanelType_Panel,
@@ -40,6 +44,12 @@ NAUI_API void naui_panel_manager_render(void);
 
 NAUI_API void naui_register_panel_layer(const char *layer, NauiPanelType type, NauiPanelFn create = nullptr, NauiPanelFn render = nullptr, size_t data_size = 0);
 
+template<typename T>
+void naui_register_panel_layer(const char *layer, NauiPanelType type, NauiPanelFn create = nullptr, NauiPanelFn render = nullptr)
+{
+    naui_register_panel_layer(layer, type, create, render, sizeof(T));
+}
+
 NAUI_API NauiPanelInstance &naui_create_panel(const char *layer, const char *title);
-NAUI_API NauiPanelInstance* naui_get_first_panel_of_layer(const char *layer);
+NAUI_API NauiPanelInstance &naui_get_first_panel_of_layer(const char *layer);
 NAUI_API std::vector<NauiPanelInstance*> &naui_get_all_panels_of_layer(const char *layer);

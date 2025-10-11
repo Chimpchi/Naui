@@ -343,11 +343,12 @@ LRESULT CALLBACK win32_process_message(HWND hwnd, uint32_t msg, WPARAM w_param, 
                 cleanup_render_target();
                 platform->swap_chain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
                 create_render_target();
-                NauiResizeEvent data;
-                data.width = width;
-                data.height = height;
-                //naui_event_call(NauiSystemEventCode_Resize, (void*)&data);
             }
+
+            NauiResizeEvent data;
+            data.width = width;
+            data.height = height;
+            naui_event_call(NauiSystemEventCode_Resize, (void*)&data);
         }
         break;
         case WM_KEYDOWN:
