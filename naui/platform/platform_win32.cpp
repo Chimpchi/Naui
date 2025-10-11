@@ -388,7 +388,8 @@ LRESULT CALLBACK win32_process_message(HWND hwnd, uint32_t msg, WPARAM w_param, 
         }
         break;
     }
-    return DefWindowProc(hwnd, msg, w_param, l_param);
+
+	return false;
 }
 
 std::filesystem::path naui_open_file_dialog(const wchar_t* filter, const wchar_t* title) 
