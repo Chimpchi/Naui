@@ -19,14 +19,22 @@ static void complex_panel_render(NauiPanelInstance &panel)
 
 void naui_app_initialize(void)
 {
-    naui_register_panel_layer("basic", NauiPanelType_Panel, nullptr, [](NauiPanelInstance &panel) {
-        ImGui::Button("Hello World!");
+    naui_register_panel_layer("basic", nullptr, [](NauiPanelInstance &panel) {
+        if (ImGui::Button("Hello World!"))
+            ImGui::OpenPopup("Test4");
+        
+        if (ImGui::BeginPopupModal("Test4"))
+        {
+            ImGui::Button("Hello World!");
+            ImGui::EndPopup();
+        }
     });
 
-    naui_register_panel_layer<TestPanelData>("complex", NauiPanelType_Panel,
+    naui_register_panel_layer<TestPanelData>("complex",
     [](NauiPanelInstance &panel)
     {
         TestPanelData *data = (TestPanelData*)panel.data;
+        panel.panel_flags = NauiWindowFlags_ClosedByDefault;
     }, complex_panel_render);
 
     naui_create_panel("basic", "Test");

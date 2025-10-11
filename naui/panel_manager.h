@@ -11,17 +11,17 @@
     #define NAUI_MAX_PANEL_SCRATCH_SIZE (1 << 16)
 #endif
 
-enum NauiPanelType
+typedef uint32_t NauiPanelFlags;
+enum
 {
-    NauiPanelType_Panel,
-    NauiPanelType_Popup,
-    NauiPanelType_Modal
+    NauiPanelFlags_None = 0,
+    NauiWindowFlags_ClosedByDefault = 1 << 0
 };
 
 typedef void (*NauiPanelFn)(struct NauiPanelInstance &panel);
 struct NauiPanelInstance
 {
-    NauiPanelType type = NauiPanelType_Panel;
+    NauiPanelFlags panel_flags = NauiPanelFlags_None;
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
 
     ImVec2 default_size = ImVec2(300, 300);
@@ -42,12 +42,12 @@ NAUI_API void naui_panel_manager_initialize(void);
 NAUI_API void naui_panel_manager_shutdown(void);
 NAUI_API void naui_panel_manager_render(void);
 
-NAUI_API void naui_register_panel_layer(const char *layer, NauiPanelType type, NauiPanelFn create = nullptr, NauiPanelFn render = nullptr, size_t data_size = 0);
+NAUI_API void naui_register_panel_layer(const char *layer, NauiPanelFn create = nullptr, NauiPanelFn render = nullptr, size_t data_size = 0);
 
 template<typename T>
-void naui_register_panel_layer(const char *layer, NauiPanelType type, NauiPanelFn create = nullptr, NauiPanelFn render = nullptr)
+void naui_register_panel_layer(const char *layer, NauiPanelFn create = nullptr, NauiPanelFn render = nullptr)
 {
-    naui_register_panel_layer(layer, type, create, render, sizeof(T));
+    naui_register_panel_layer(layer, create, render, sizeof(T));
 }
 
 NAUI_API NauiPanelInstance &naui_create_panel(const char *layer, const char *title);

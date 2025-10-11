@@ -10,7 +10,6 @@
 struct NauiPanelLayerRegistry
 {
     size_t size;
-    NauiPanelType type;
     NauiPanelFn create;
     NauiPanelFn render;
 };
@@ -36,42 +35,20 @@ void naui_panel_manager_render(void)
     {
         if (!panel.is_open)
             continue;
-        switch (panel.type)
-        {
-        case NauiPanelType_Panel:
-            ImGui::PushID(panel.type);
-            ImGui::SetNextWindowSize(panel.default_size, ImGuiCond_FirstUseEver);
-            ImGui::SetNextWindowSizeConstraints(panel.min_size, panel.max_size);
-            if (ImGui::Begin(panel.title, &panel.is_open, panel.window_flags) && panel.render)
-                panel.render(panel);
-            ImGui::End();
-            ImGui::PopID();
-            break;
-        case NauiPanelType_Popup:
-            ImGui::OpenPopup(panel.title);
-            if (ImGui::BeginPopup(panel.title, panel.window_flags) && panel.render)
-            {
-                panel.render(panel);
-                ImGui::EndPopup();
-            }
-            break;
-        case NauiPanelType_Modal:
-            ImGui::OpenPopup(panel.title);
-            if (ImGui::BeginPopupModal(panel.title, &panel.is_open, panel.window_flags) && panel.render)
-            {
-                panel.render(panel);
-                ImGui::EndPopup();
-            }
-            break;
-        }
+        ImGui::PushID(panel.layer);
+        ImGui::SetNextWindowSize(panel.default_size, ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSizeConstraints(panel.min_size, panel.max_size);
+        if (ImGui::Begin(panel.title, &panel.is_open, panel.window_flags) && panel.render)
+            panel.render(panel);
+        ImGui::End();
+        ImGui::PopID();
     }
 }
 
-void naui_register_panel_layer(const char *layer, NauiPanelType type, NauiPanelFn create, NauiPanelFn render, size_t data_size)
+void naui_register_panel_layer(const char *layer, NauiPanelFn create, NauiPanelFn render, size_t data_size)
 {
     panel_layers[layer] = {
         .size = data_size,
-        .type = type,
         .create = create,
         .render = render
     };
@@ -81,7 +58,6 @@ NauiPanelInstance &naui_create_panel(const char *layer, const char *title)
 {
     const NauiPanelLayerRegistry &const panel_layer = panel_layers[layer];
     NauiPanelInstance panel = {
-        .type = panel_layer.type,
         .title = title,
         .layer = layer,
         .create = panel_layer.create,
@@ -92,8 +68,12 @@ NauiPanelInstance &naui_create_panel(const char *layer, const char *title)
         panel.data = (void*)naui_arena_alloc(arena, panel_layer.size);
         memset(panel.data, 0, panel_layer.size);
     }
+
     if (panel_layer.create)
         panel_layer.create(panel);
+
+    panel.is_open = (panel.panel_flags & NauiWindowFlags_ClosedByDefault) == 0;
+
     panels.push_back(panel);
     return panel;
 }
