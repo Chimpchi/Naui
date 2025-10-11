@@ -23,9 +23,13 @@ void naui_app_initialize(void)
         if (ImGui::Button("Hello World!"))
             ImGui::OpenPopup("Test4");
         
-        if (ImGui::BeginPopupModal("Test4"))
+        if (ImGui::BeginPopupModal("Test4", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove))
         {
-            ImGui::Button("Hello World!");
+            if (ImGui::Button("Hello World!"))
+            {
+                naui_get_first_panel_of_layer("complex").is_open = true;
+                ImGui::CloseCurrentPopup();
+            }
             ImGui::EndPopup();
         }
     });

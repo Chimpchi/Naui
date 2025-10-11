@@ -32,7 +32,7 @@ struct NauiPanelInstance
     const char *layer;
     void *data;
 
-    bool is_open = true;
+    bool is_open;
 
     NauiPanelFn create;
     NauiPanelFn render;
