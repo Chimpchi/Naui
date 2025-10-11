@@ -6,6 +6,8 @@
 #define NAUI_PLATFORM_WINDOWS 1
 #elif defined(__linux__) || defined(__gnu_linux__)
 #define NAUI_PLATFORM_LINUX 1
+#elif defined(__APPLE__)
+#define NAUI_PLATFORM_MAC 1
 #endif
 
 #ifdef NAUI_EXPORT
