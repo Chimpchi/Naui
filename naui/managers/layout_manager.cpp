@@ -61,8 +61,8 @@ bool naui_load_layout(const char* name) {
 }
 
 bool naui_remove_layout(const char* name) {
-    if (naui_layout_has_header(name, IMMUTABLE_IDENTIFIER))
-        return false;
+    //if (naui_layout_has_header(name, IMMUTABLE_IDENTIFIER))
+        //return false;
 
     std::string filename = std::string(name) + INI_EXTENSION;
     if (std::filesystem::exists(filename)) {
