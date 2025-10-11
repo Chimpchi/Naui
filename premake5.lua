@@ -17,7 +17,9 @@ project "Naui"
         "naui/vendor/stb/**.h",
         "naui/vendor/stb/**.c",
         "naui/vendor/imgui/**.h",
-        "naui/vendor/imgui/**.cpp"
+        "naui/vendor/imgui/**.cpp",
+		"naui/vendor/miniz/**.c",
+		"naui/vendor/miniz/**.h"
     }
 
     includedirs {
@@ -26,7 +28,8 @@ project "Naui"
         "naui/vendor/stb",
         "naui/vendor/imgui",
         "naui/vendor/mINI",
-        "naui/vendor/nlohmann"
+        "naui/vendor/nlohmann",
+		"naui/vendor/miniz"
     }
 
     defines { "NDEBUG", "NAUI_EXPORT", "IMGUI_BUILD_DLL" }
